@@ -2,7 +2,7 @@ import re
 from functools import reduce
 from itertools import chain
 
-from influxdb_client.client.write.point import _ESCAPE_KEY
+from influxdb_client.client.write.point import _ESCAPE_KEY, _ESCAPE_MEASUREMENT
 
 """
 Functions for serialize Pandas DataFrame.
@@ -53,7 +53,7 @@ def data_frame_to_list_of_points(data_frame, point_settings, **kwargs):
     if data_frame.index.tzinfo is None:
         data_frame.index = data_frame.index.tz_localize('UTC')
 
-    measurement_name = kwargs.get('data_frame_measurement_name')
+    measurement_name = str(kwargs.get('data_frame_measurement_name')).translate(_ESCAPE_MEASUREMENT)
     data_frame_tag_columns = kwargs.get('data_frame_tag_columns')
     data_frame_tag_columns = set(data_frame_tag_columns or [])
 

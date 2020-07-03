@@ -147,3 +147,23 @@ class DataFrameWriteTest(BaseTest):
                          points[3])
 
         write_api.__del__()
+
+    def test_escaping_measurement(self):
+        from influxdb_client.extras import pd, np
+
+        now = pd.Timestamp('2020-04-05 00:00+00:00')
+
+        data_frame = pd.DataFrame(data=[["coyote_creek", np.int64(100.5)], ["coyote_creek", np.int64(200)]],
+                                  index=[now + timedelta(hours=1), now + timedelta(hours=2)],
+                                  columns=["location", "water_level"])
+
+        points = data_frame_to_list_of_points(data_frame=data_frame,
+                                              point_settings=PointSettings(),
+                                              data_frame_measurement_name='measu rement',
+                                              data_frame_tag_columns={"tag"})
+
+        self.assertEqual(2, len(points))
+        self.assertEqual("measu\\ rement location=\"coyote_creek\",water_level=100i 1586048400000000000",
+                         points[0])
+        self.assertEqual("measu\\ rement location=\"coyote_creek\",water_level=200i 1586052000000000000",
+                         points[1])
